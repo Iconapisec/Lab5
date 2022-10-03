@@ -20,11 +20,24 @@ public class HomeController : Controller
     {
         //var data = await _calculateData.GetBinary(word);
         var data = "0100101000001111".Select(d => int.Parse(d.ToString())).ToArray();
+        data = "11000011".Select(d => int.Parse(d.ToString())).ToArray();
         var ResultData = new ResultDataModel(){Points = data};
         ResultData.Results.Add(await _calculateData.NRZ(data));
         ResultData.Results.Add(await _calculateData.AMI(data));
         ResultData.Results.Add(await _calculateData.NRZI(data));
         ResultData.Results.Add(await _calculateData.B2B1Q(data));
+        ResultData.Results.Add(await _calculateData.MLT3(data));
+        #region 8
+        var s  = await _calculateData.Skremb("1010000000001101".Select(d => int.Parse(d.ToString())).ToArray());
+        var sAMI = await _calculateData.AMI(s.Points.Cast<int>().ToArray());
+        s.Code.AppendLine($"Скремблирование:{sAMI.Code}<br />");
+        s.Points = sAMI.Points;
+        s.Name = "S AMI";
+        #endregion
+        ResultData.Results.Add(s);
+        //var q = await _calculateData.AMI(s.Points.Cast<int>().ToArray());
+        //q.Name = "SKREMB AMI";
+        //ResultData.Results.Add(q);
         return View(ResultData);
     }
 

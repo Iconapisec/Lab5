@@ -7,7 +7,9 @@ namespace lab5.Services
     {
         public async Task<Result> NRZ(int[] data)
         {
+
             Result result = new ();
+            result.Code.Append("NRZ code value: ");
             for(int i = 0; i < data.Length; i++)
             {
                 result.Points.Add(data[i] == 0 ? 0 : 1);
@@ -20,6 +22,7 @@ namespace lab5.Services
         public async Task<Result> AMI(int[] data)
         {
             Result result = new ();
+            result.Code.Append("AMI code value: ");
             bool state = false;
             for(int i = 0; i < data.Length; i++)
             {
@@ -42,6 +45,7 @@ namespace lab5.Services
         public async Task<Result> NRZI(int[] data)
         {
             Result result = new ();
+            result.Code.Append("NRZI code value: ");
             bool state = false;
 
             for(int i = 0; i < data.Length; i++)
@@ -70,7 +74,7 @@ namespace lab5.Services
                 }
             }
 
-            result.Color = "rgb(204,255,204)";
+            result.Color = "rgb(0,0,204)";
             result.Name = "NRZI";
             return await Task.FromResult(result);
         }
@@ -100,26 +104,62 @@ namespace lab5.Services
             result.Name = "2B1Q";
             return await Task.FromResult(result);
         }
-        public async Task<Tuple<int[],string>> MLT3(int[] data)
+        public async Task<Result> MLT3(int[] data)
         {
-            List<int> result  = new();
-            StringBuilder sb  = new();
+            Result result = new();
+            result.Code.Append("MLT3 code value: ");
+            int currentState = data[0];
             bool state = false;
             for(int i = 0; i < data.Length; i++)
             {
-                if (data[i] == 1)
+                if(data[i] == 0)
                 {
-                    result.Add(!state? 1 : -1);
-                    sb.Append(!state? "+" : "-");
+                    result.Points.Add(currentState);
+                    result.Code.Append(currentState == 0 ? 0 : (currentState == -1? '-':"+"));
+                }
+                else if(data[i] == 1 && currentState == 0)
+                {
+                    result.Points.Add(!state? 1 : -1);
+                    currentState = !state? 1 : -1;
+                    result.Code.Append(!state ? '+':'-');
                     state = !state;
+                }
+                else if(data[i] == 1 && (currentState == -1 || currentState == 1))
+                {
+                    result.Points.Add(0);
+                    result.Code.Append(0);
+                    currentState = 0;
+                }
+            }
+            result.Color = "rgb(25,0,51)";
+            result.Name = "MLT-3";
+            return await Task.FromResult(result);
+        }
+        public async Task<Result> Skremb(int[] data)
+        {
+            Result result = new();
+            result.Code.AppendLine("Скремблирование:<br />");
+            for(int i = 0; i < data.Length; i++)
+            {
+                if(i > 4)
+                {
+                    result.Points.Add(data[i] ^ (int)result.Points[i-3] ^ (int)result.Points[i-5]);
+                    result.Code.AppendLine($"B{i+1} = A{i+1} + B{i-2} + B{i-4} = {data[i]} + {(int)result.Points[i-3]} + {(int)result.Points[i-5]} = {data[i] ^ (int)result.Points[i-3] ^ (int)result.Points[i-5]}<br />");
+                }
+                else if(i > 2)
+                {
+                    result.Points.Add(data[i] ^ (int)result.Points[i-3]);
+                    result.Code.AppendLine($"B{i+1} = A{i+1} + B{i-2} = {data[i]} + {(int)result.Points[i-3]} = {data[i] ^ (int)result.Points[i-3]}<br />");
                 }
                 else
                 {
-                    result.Add(0);
-                    sb.Append(0);
+                    result.Points.Add(data[i]);
+                    result.Code.AppendLine($"B{i+1} = A{i+1} = {data[i]}<br />");
                 }
             }
-            return await Task.FromResult(new Tuple<int[],string>(result.ToArray(),sb.ToString()));
+            result.Code.AppendLine($"Result: {string.Join("",result.Points)}<br />");
+            result.Color = "rgb(0,102,102)";
+            return await Task.FromResult(result);
         }
         public async Task<string> GetBinary(string word)
         {
