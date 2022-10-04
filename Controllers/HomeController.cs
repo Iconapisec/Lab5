@@ -16,34 +16,38 @@ public class HomeController : Controller
         _calculateData = calculateData;
     }
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        //var data = await _calculateData.GetBinary(word);
+        return View();
+    }
+    [HttpPost]
+    public async Task<IActionResult> Calculate(string word)
+    {
+        string b = Convert.ToString(Request.Form["word"]);
+
+        var t = Request.Form;
+        Console.WriteLine(b);
+        var w = await _calculateData.GetBinary("sdfsdf");
+        //var data = w.Select(d => int.Parse(d.ToString())).ToArray();
         var data = "0100101000001111".Select(d => int.Parse(d.ToString())).ToArray();
-        data = "11000011".Select(d => int.Parse(d.ToString())).ToArray();
+        //data = "0100101000001111".Select(d => int.Parse(d.ToString())).ToArray();
         var ResultData = new ResultDataModel(){Points = data};
         ResultData.Results.Add(await _calculateData.NRZ(data));
         ResultData.Results.Add(await _calculateData.AMI(data));
         ResultData.Results.Add(await _calculateData.NRZI(data));
         ResultData.Results.Add(await _calculateData.B2B1Q(data));
         ResultData.Results.Add(await _calculateData.MLT3(data));
+        ResultData.Results.Add(await _calculateData.Bipolyar(data));
+        ResultData.Results.Add(await _calculateData.Manchester(data));
         #region 8
-        var s  = await _calculateData.Skremb("1010000000001101".Select(d => int.Parse(d.ToString())).ToArray());
-        var sAMI = await _calculateData.AMI(s.Points.Cast<int>().ToArray());
-        s.Code.AppendLine($"Скремблирование:{sAMI.Code}<br />");
-        s.Points = sAMI.Points;
-        s.Name = "S AMI";
-        #endregion
+        var s  = await _calculateData.Skremb(data);
         ResultData.Results.Add(s);
-        //var q = await _calculateData.AMI(s.Points.Cast<int>().ToArray());
-        //q.Name = "SKREMB AMI";
-        //ResultData.Results.Add(q);
+        var sAMI = await _calculateData.AMI(s.Points.Cast<int>().ToArray());
+        sAMI.Name = "S AMI";
+        sAMI.Code.Replace("AMI", "sAMI");
+        ResultData.Results.Add(sAMI);
+        #endregion
         return View(ResultData);
-    }
-
-    public IActionResult Privacy()
-    {
-        return View();
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

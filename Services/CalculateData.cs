@@ -135,10 +135,54 @@ namespace lab5.Services
             result.Name = "MLT-3";
             return await Task.FromResult(result);
         }
+        public async Task<Result> Bipolyar(int[] data)
+        {
+            Result result = new();
+            result.Code.Append("Bipolyar code value: ");
+            for(int i = 0; i < data.Length; i++)
+            {
+                if(data[i] == 0)
+                {
+                    result.Points.AddRange(new object[] {-1,0});
+                    result.Code.Append("-0");
+                }
+                else
+                {
+                    result.Points.AddRange(new object[]{1,0});
+                    result.Code.Append("+0");
+                }
+            }
+            result.Color = "rgb(51,102,0)";
+            result.Name = "Bipolyar";
+            return await Task.FromResult(result);
+        }
+
+        public async Task<Result> Manchester(int[] data)
+        {
+            Result result = new();
+            result.Code.Append("Manchester code value: ");
+            for(int i = 0; i < data.Length; i++)
+            {
+                if(data[i] == 0)
+                {
+                    result.Points.AddRange(new object[] {1,0});
+                    result.Code.Append("↓");
+                }
+                else
+                {
+                    result.Points.AddRange(new object[]{0,1});
+                    result.Code.Append("↑");
+                }
+            }
+            result.Name = "Manchester";
+            result.Color = "rgb(0,102,102)";
+            return await Task.FromResult(result);
+        }
+
         public async Task<Result> Skremb(int[] data)
         {
             Result result = new();
-            result.Code.AppendLine("Скремблирование:<br />");
+            result.Code.AppendLine("Skremb:<br />");
             for(int i = 0; i < data.Length; i++)
             {
                 if(i > 4)
@@ -158,6 +202,7 @@ namespace lab5.Services
                 }
             }
             result.Code.AppendLine($"Result: {string.Join("",result.Points)}<br />");
+            result.Name = "Skremb";
             result.Color = "rgb(0,102,102)";
             return await Task.FromResult(result);
         }

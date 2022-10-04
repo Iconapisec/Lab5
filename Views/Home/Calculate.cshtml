@@ -1,0 +1,81 @@
+@model ResultDataModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <canvas id="myChart"></canvas>
+    <canvas id="myChart2"></canvas>
+    @foreach (var item in Model.Results)
+    {
+      <p class="mb-0">@Html.Raw(@item.Code)</p>
+    }
+</div>
+<script>
+    const data = {
+      labels: @Html.Raw(Json.Serialize(@Model.Points)),
+      datasets: []
+    };
+    const data2 =
+    {
+      labels: [],
+      datasets: []
+    }
+</script>
+      @foreach (var item in Model.Points)
+      {
+        <script>
+          data2.labels.push(@item,@item);
+        </script>
+      }
+@foreach (var item in Model.Results)
+{
+    if(@item.Name != "Bipolyar" && @item.Name != "Manchester")
+    {
+      <script>
+        data.datasets.push(
+      {label: '@item.Name',data : @Html.Raw(Json.Serialize(@item.Points)),borderColor: '@item.Color',backgroundColor: '@item.Color', hidden:true, stepped: true}
+        )
+      </script>
+    }
+    else
+    {
+      <script>
+        data2.datasets.push(
+      {label: '@item.Name',data : @Html.Raw(Json.Serialize(@item.Points)),borderColor: '@item.Color',backgroundColor: '@item.Color', hidden:true, stepped: true}
+        )
+      </script>
+    }
+}
+<script>
+const config = {
+  type: 'line',
+  data: data,
+  scales: {
+      y: {
+        min: 10,
+        max: 50,
+      }
+  }
+};
+
+const config2 = {
+  type: 'line',
+  data: data2,
+  scales: {
+      y:{
+        min: 10,
+        max: 50,
+      }
+  }
+};
+
+const myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+);
+const myChart2 = new Chart(
+    document.getElementById('myChart2'),
+    config2
+);
+</script>
